@@ -1,0 +1,9 @@
+candidate v51all vs src  run 9  Thu Nov 12 23:25:28 UTC 2026
+candidate=v51all
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W549 L359 D1092  penta[33, 178, 419, 306, 64]
+elo +33.1 +- 9.9
+LLR 15.16 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H1 ACCEPTED
