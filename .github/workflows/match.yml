@@ -1,0 +1,63 @@
+name: match
+on:
+  push:
+    paths: [queue.txt]
+  workflow_dispatch:
+concurrency:
+  group: match
+  cancel-in-progress: false
+permissions:
+  contents: write
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      shards: ${{ steps.q.outputs.shards }}
+      cand: ${{ steps.q.outputs.candidate }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: q
+        run: |
+          n=$(grep '^shards=' queue.txt | cut -d= -f2); echo "shards=[$(seq -s, 1 $n)]" >> "$GITHUB_OUTPUT"
+          echo "candidate=$(grep '^candidate=' queue.txt | cut -d= -f2)" >> "$GITHUB_OUTPUT"
+  play:
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(needs.setup.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: build base + candidate
+        run: |
+          . <(grep -E '^(candidate|pairs|tc_ms|inc_ms)=' queue.txt)
+          F="-std=c++20 -O3 -march=native -DNDEBUG -pthread"
+          mkdir -p cand && cp src/* cand/ && cp candidates/$candidate/* cand/ 2>/dev/null || true
+          rm -f cand/README.md
+          (cd src && g++ $F *.cpp -o ../base) & (cd cand && g++ $F *.cpp -o ../candbin) & g++ $F -Isrc tools/match2.cpp src/chess.cpp -o match2 & wait
+          echo uci | ./candbin | grep -q uciok && echo uci | ./base | grep -q uciok
+      - name: play
+        run: |
+          . <(grep -E '^(candidate|pairs|tc_ms|inc_ms)=' queue.txt)
+          nproc; ./match2 ./candbin ./base $pairs 2 $tc_ms $inc_ms $(( GITHUB_RUN_NUMBER * 100 + ${{ matrix.shard }} )) | tail -3 | tee shard_${{ matrix.shard }}.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shard-${{ matrix.shard }}
+          path: shard_${{ matrix.shard }}.txt
+  merge:
+    needs: [setup, play]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: shards
+      - run: |
+          c=${{ needs.setup.outputs.cand }}; f=results/${c}_run${GITHUB_RUN_NUMBER}.txt; mkdir -p results
+          { echo "candidate $c vs src  run $GITHUB_RUN_NUMBER  $(date -u)"; cat queue.txt | grep -v '^#'; python3 tools/merge.py shards; } | tee $f
+          cat $f >> "$GITHUB_STEP_SUMMARY"
+          git config user.name "apx-bot"; git config user.email "apx-bot@users.noreply.github.com"
+          git add results && git commit -m "match result: $c run $GITHUB_RUN_NUMBER" && git pull --rebase && git push
