@@ -1,0 +1,9 @@
+candidate corrhist vs src  run 2  Thu Nov 12 20:54:48 UTC 2026
+candidate=corrhist
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W524 L458 D1018  penta[48, 216, 412, 270, 54]
+elo +11.5 +- 10.2
+LLR 2.22 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> inconclusive
