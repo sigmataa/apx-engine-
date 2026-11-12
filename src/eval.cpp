@@ -62,23 +62,30 @@ int nnueEvaluate(const Board& b){
     if(!frames[j].computed||king)refresh(b,frames[top]);
     else{KingView kv[2]={kingView(b,WHITE),kingView(b,BLACK)};for(int k=j+1;k<=top;++k)apply(frames[k-1],frames[k],kv);}
     const std::int16_t (&acc)[2][NN_MAX_H]=frames[top].acc;
-    int out=NN_B2;const std::int16_t* us=acc[b.side];const std::int16_t* them=acc[b.side^1];
+#ifdef NN_OUTBUCKETS
+    // Output buckets by piece count (matches train_ob.py: bucket=(pieces-2)/4).
+    const int ob=std::min(NN_OUTBUCKETS-1,std::max(0,(__builtin_popcountll(b.occupied())-2)/4));
+    const std::int16_t* W2=NN_W2+ob*2*NN_H;const std::int16_t* W2T=NN_W2T+ob*2*NN_HT;int out=NN_B2[ob];
+#else
+    const std::int16_t* W2=NN_W2;const std::int16_t* W2T=NN_W2T;int out=NN_B2;
+#endif
+    const std::int16_t* us=acc[b.side];const std::int16_t* them=acc[b.side^1];
 #if defined(__AVX2__)
     static_assert(NN_H%16==0,"AVX2 path needs NN_H multiple of 16");
     {   const __m256i zero=_mm256_setzero_si256(),hi=_mm256_set1_epi16(255);__m256i sum=_mm256_setzero_si256();
         for(int j=0;j<NN_H;j+=16){
             __m256i x=_mm256_min_epi16(_mm256_max_epi16(_mm256_load_si256((const __m256i*)(us+j)),zero),hi);
-            sum=_mm256_add_epi32(sum,_mm256_madd_epi16(x,_mm256_loadu_si256((const __m256i*)(NN_W2+j))));
+            sum=_mm256_add_epi32(sum,_mm256_madd_epi16(x,_mm256_loadu_si256((const __m256i*)(W2+j))));
             __m256i y=_mm256_min_epi16(_mm256_max_epi16(_mm256_load_si256((const __m256i*)(them+j)),zero),hi);
-            sum=_mm256_add_epi32(sum,_mm256_madd_epi16(y,_mm256_loadu_si256((const __m256i*)(NN_W2+NN_H+j))));
+            sum=_mm256_add_epi32(sum,_mm256_madd_epi16(y,_mm256_loadu_si256((const __m256i*)(W2+NN_H+j))));
         }
         __m128i t=_mm_add_epi32(_mm256_castsi256_si128(sum),_mm256_extracti128_si256(sum,1));
         t=_mm_add_epi32(t,_mm_shuffle_epi32(t,0x4E));t=_mm_add_epi32(t,_mm_shuffle_epi32(t,0xB1));
         out+=_mm_cvtsi128_si32(t);
     }
 #else
-    for(int j=0;j<NN_H;++j)out+=std::clamp<int>(us[j],0,255)*NN_W2[j];
-    for(int j=0;j<NN_H;++j)out+=std::clamp<int>(them[j],0,255)*NN_W2[NN_H+j];
+    for(int j=0;j<NN_H;++j)out+=std::clamp<int>(us[j],0,255)*W2[j];
+    for(int j=0;j<NN_H;++j)out+=std::clamp<int>(them[j],0,255)*W2[NN_H+j];
 #endif
     // Threat inputs (matches tools/train_threat.cpp): every attacked piece activates
     // (victim colour relative to perspective, victim type, cheapest attacker, square).
@@ -103,8 +110,8 @@ int nnueEvaluate(const Board& b){
                 const std::int16_t* w=&NN_WT[idx*NN_HT];for(int j=0;j<NN_HT;++j)at[q][j]+=w[j];
             }
         }
-        for(int j=0;j<NN_HT;++j)out+=std::clamp<int>(at[b.side][j],0,255)*NN_W2T[j];
-        for(int j=0;j<NN_HT;++j)out+=std::clamp<int>(at[b.side^1][j],0,255)*NN_W2T[NN_HT+j];
+        for(int j=0;j<NN_HT;++j)out+=std::clamp<int>(at[b.side][j],0,255)*W2T[j];
+        for(int j=0;j<NN_HT;++j)out+=std::clamp<int>(at[b.side^1][j],0,255)*W2T[NN_HT+j];
     }
     int value=int(std::int64_t(out)*400/(255*64));
     value=value*(200-std::min(b.halfmove,100))/200;
