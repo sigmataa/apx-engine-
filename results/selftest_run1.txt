@@ -1,0 +1,9 @@
+candidate selftest vs src  run 1  Thu Nov 12 19:59:37 UTC 2026
+candidate=selftest
+shards=20
+pairs=30
+tc_ms=4000
+inc_ms=40
+shards 20  games 1200  W287 L276 D637  penta[16, 118, 327, 117, 22]
+elo +3.2 +- 11.2
+LLR -1.99 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> inconclusive
