@@ -1,6 +1,6 @@
 # Edit and push this file to start a match. candidate = folder in candidates/ whose files replace src/ files.
-candidate=selftest
+candidate=corrhist
 shards=20
-pairs=30
+pairs=50
 tc_ms=4000
 inc_ms=40
