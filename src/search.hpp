@@ -76,6 +76,9 @@ class Searcher {
     std::array<std::array<std::array<std::int16_t,64>,64>,2> history{};
     std::array<std::array<std::array<std::int16_t,7>,64>,13> captureHistory{};
     std::vector<std::int16_t> continuation;
+    std::array<std::array<int,16384>,2> corrHist{};
+    int corrected(const Board& b,int raw)const;
+    void updateCorrection(const Board& b,int depth,int diff);
     std::array<std::array<Move,MAX_PLY>,MAX_PLY> pv{};
     std::array<int,MAX_PLY> pvLength{};
     bool visit();

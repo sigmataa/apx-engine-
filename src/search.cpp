@@ -102,7 +102,7 @@ int TranspositionTable::hashfull()const{
     return total?n*1000/total:0;
 }
 void Searcher::clear(){
-    history={};captureHistory={};counters={};killers={};
+    history={};captureHistory={};counters={};killers={};corrHist={};
     std::fill(continuation.begin(),continuation.end(),0);evaluator.clear();searches=0;nullVerificationPly=-1;
 }
 bool Searcher::visit(){
@@ -223,6 +223,16 @@ void Searcher::updatePv(int ply,Move m){
     for(int i=0;i<child;++i)pv[ply][i+1]=pv[ply+1][i];
     pvLength[ply]=child+1;
 }
+// Pawn-structure correction history: learns the average error of the static eval per pawn structure.
+constexpr int CORR_GRAIN=256,CORR_WSCALE=1024,CORR_MAX=CORR_GRAIN*48;
+int Searcher::corrected(const Board& b,int raw)const{
+    int v=raw+corrHist[b.side][b.pawnKey&16383]/CORR_GRAIN;
+    return std::clamp(v,-MATE_BOUND+1,MATE_BOUND-1);
+}
+void Searcher::updateCorrection(const Board& b,int depth,int diff){
+    int& e=corrHist[b.side][b.pawnKey&16383];int w=std::min(depth*depth+2*depth+1,128);
+    e=std::clamp((e*(CORR_WSCALE-w)+diff*CORR_GRAIN*w)/CORR_WSCALE,-CORR_MAX,CORR_MAX);
+}
 int Searcher::qsearch(Board& b,int alpha,int beta,int ply,int quietChecks){
     pvLength[ply]=0;selectiveDepth=std::max(selectiveDepth,ply);
     if(!visit())return 0;
@@ -233,10 +243,11 @@ int Searcher::qsearch(Board& b,int alpha,int beta,int ply,int quietChecks){
     bool compatible=hit.depth>0||hit.qchecks==(quietChecks>0);
     if(compatible&&!pvNode&&b.halfmove<90&&hit.found&&(hit.bound==EXACT||(hit.bound==LOWER&&hit.score>=beta)||(hit.bound==UPPER&&hit.score<=alpha)))return hit.score;
     int qdepth=quietChecks?-1:0;
-    int originalAlpha=alpha,staticEval=checked?NO_EVAL:(hit.found&&hit.eval!=NO_EVAL?hit.eval:evaluator.evaluate(b));
+    int originalAlpha=alpha,rawEval=checked?NO_EVAL:(hit.found&&hit.eval!=NO_EVAL?hit.eval:evaluator.evaluate(b));
+    int staticEval=checked?NO_EVAL:corrected(b,rawEval);
     int best=checked?-INF:staticEval;Move bestMove=0;
     if(!checked){
-        if(best>=beta){tt.store(b.key,ply,qdepth,best,staticEval,LOWER,0);return best;}
+        if(best>=beta){tt.store(b.key,ply,qdepth,best,rawEval,LOWER,0);return best;}
         alpha=std::max(alpha,best);
     }
     stack[ply].inCheck=checked;stack[ply].staticEval=staticEval;
@@ -285,7 +296,7 @@ int Searcher::qsearch(Board& b,int alpha,int beta,int ply,int quietChecks){
         if(score>best){best=score;bestMove=m;if(score>alpha){alpha=score;updatePv(ply,m);if(score>=beta)break;}}
     }
     if(checked&&!legal)return -MATE+ply;
-    tt.store(b.key,ply,qdepth,best,staticEval,best>=beta?LOWER:best>originalAlpha?EXACT:UPPER,bestMove);
+    tt.store(b.key,ply,qdepth,best,rawEval,best>=beta?LOWER:best>originalAlpha?EXACT:UPPER,bestMove);
     return best;
 }
 int Searcher::search(Board& b,int depth,int alpha,int beta,int ply,bool pvNode,bool allowNull){
@@ -302,7 +313,8 @@ int Searcher::search(Board& b,int depth,int alpha,int beta,int ply,bool pvNode,b
        &&(hit.bound==EXACT||(hit.bound==LOWER&&hit.score>=beta)||(hit.bound==UPPER&&hit.score<=alpha)))return hit.score;
     if(checked&&depth>=2&&ply<rootDepth*2)++depth;
     depth=std::min(depth,MAX_PLY-ply-2);
-    int staticEval=checked?NO_EVAL:(hit.found&&hit.eval!=NO_EVAL?hit.eval:evaluator.evaluate(b));
+    int rawEval=checked?NO_EVAL:(hit.found&&hit.eval!=NO_EVAL?hit.eval:evaluator.evaluate(b));
+    int staticEval=checked?NO_EVAL:corrected(b,rawEval);
     stack[ply].inCheck=checked;stack[ply].staticEval=staticEval;
     bool improving=!checked&&ply>=2&&stack[ply-2].staticEval!=NO_EVAL&&staticEval>stack[ply-2].staticEval;
     // Verification must examine real moves instead of returning the same
@@ -346,7 +358,7 @@ int Searcher::search(Board& b,int depth,int alpha,int beta,int ply,bool pvNode,b
                 if(value>=pcBeta)value=-search(b,depth-4,-pcBeta,-pcBeta+1,ply+1,false,true);
                 b.unmake(m,undo);
                 if(control->stop.load(std::memory_order_relaxed))return 0;
-                if(value>=pcBeta){tt.store(b.key,ply,depth-3,value,staticEval,LOWER,m);return value;}
+                if(value>=pcBeta){tt.store(b.key,ply,depth-3,value,rawEval,LOWER,m);return value;}
             }
         }
         if(depth>=5&&!hit.best)--depth;
@@ -414,7 +426,9 @@ int Searcher::search(Board& b,int depth,int alpha,int beta,int ply,bool pvNode,b
     }
     if(!legal)return excludedMove?alpha:checked?-MATE+ply:0;
     // A bound over a user-restricted root subset is not a full-position bound.
-    if(!excludedMove&&(ply||!rootRestricted))tt.store(b.key,ply,depth,best,staticEval,best>=beta?LOWER:best>originalAlpha?EXACT:UPPER,bestMove);
+    if(!checked&&!excludedMove&&std::abs(best)<MATE_BOUND&&(!bestMove||!b.capturedType(bestMove))
+       &&!(best>=beta&&best<=staticEval)&&!(best<=originalAlpha&&best>=staticEval))updateCorrection(b,depth,best-staticEval);
+    if(!excludedMove&&(ply||!rootRestricted))tt.store(b.key,ply,depth,best,rawEval,best>=beta?LOWER:best>originalAlpha?EXACT:UPPER,bestMove);
     return best;
 }
 Result Searcher::run(Board board,const Limits& limits,Control& shared,const Reporter& report){
