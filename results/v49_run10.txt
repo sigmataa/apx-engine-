@@ -1,0 +1,9 @@
+candidate v49 vs src  run 10  Thu Nov 12 23:47:08 UTC 2026
+candidate=v49
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W430 L707 D863  penta[102, 329, 360, 162, 47]
+elo -48.4 +- 11.0
+LLR -27.35 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H0 ACCEPTED
