@@ -1,0 +1,102 @@
+{
+ "iter": 0,
+ "max_iter": 150,
+ "R": 0.006,
+ "shards": 10,
+ "pairs": 24,
+ "tc_ms": 3000,
+ "inc_ms": 30,
+ "params": {
+  "RFPMargin": {
+   "v": 58.0,
+   "min": 30,
+   "max": 150,
+   "c": 6.0
+  },
+  "RFPImproving": {
+   "v": 28.0,
+   "min": 0,
+   "max": 80,
+   "c": 4.0
+  },
+  "RazorMargin": {
+   "v": 167.0,
+   "min": 80,
+   "max": 400,
+   "c": 16.0
+  },
+  "NMPBase": {
+   "v": 2.0,
+   "min": 1,
+   "max": 4,
+   "c": 1.0
+  },
+  "NMPDepthDiv": {
+   "v": 3.0,
+   "min": 2,
+   "max": 8,
+   "c": 1.0
+  },
+  "NMPEvalDiv": {
+   "v": 199.0,
+   "min": 80,
+   "max": 400,
+   "c": 16.0
+  },
+  "LMPBase": {
+   "v": 4.0,
+   "min": 1,
+   "max": 8,
+   "c": 1.0
+  },
+  "FutilityMul": {
+   "v": 88.0,
+   "min": 40,
+   "max": 180,
+   "c": 7.0
+  },
+  "FutilityBase": {
+   "v": 64.0,
+   "min": 0,
+   "max": 150,
+   "c": 7.5
+  },
+  "HistPrune": {
+   "v": 1563.0,
+   "min": 500,
+   "max": 4000,
+   "c": 175.0
+  },
+  "SEECapture": {
+   "v": 79.0,
+   "min": 30,
+   "max": 160,
+   "c": 6.5
+  },
+  "SingularMul": {
+   "v": 4.0,
+   "min": 1,
+   "max": 8,
+   "c": 1.0
+  },
+  "AspWindow": {
+   "v": 25.0,
+   "min": 8,
+   "max": 60,
+   "c": 2.6
+  },
+  "LMRDiv": {
+   "v": 191.0,
+   "min": 150,
+   "max": 320,
+   "c": 8.5
+  },
+  "ProbCutMargin": {
+   "v": 205.0,
+   "min": 80,
+   "max": 400,
+   "c": 16.0
+  }
+ },
+ "history": []
+}

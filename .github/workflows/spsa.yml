@@ -1,0 +1,69 @@
+name: spsa
+on:
+  workflow_dispatch:
+concurrency:
+  group: spsa
+  cancel-in-progress: false
+permissions:
+  contents: write
+  actions: write
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      shards: ${{ steps.q.outputs.shards }}
+      go: ${{ steps.q.outputs.go }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: q
+        run: |
+          python3 -c "import json;s=json.load(open('spsa/params.json'));print('shards=['+','.join(str(i) for i in range(1,s['shards']+1))+']');print('go='+('yes' if s['iter']<s['max_iter'] else 'no'))" >> "$GITHUB_OUTPUT"
+          [ -f spsa/STOP ] && echo "go=no" >> "$GITHUB_OUTPUT" || true
+  play:
+    needs: setup
+    if: needs.setup.outputs.go == 'yes'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(needs.setup.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: build
+        run: |
+          F="-std=c++20 -O3 -march=native -DNDEBUG -pthread"
+          (cd src && g++ $F *.cpp -o ../base) & g++ $F -Isrc tools/match2.cpp src/chess.cpp -o match2 & wait
+      - name: play
+        run: |
+          read PLUS MINUS < <(python3 tools/spsa.py perturb ${{ matrix.shard }} $GITHUB_RUN_ID)
+          eval $(python3 -c "import json;s=json.load(open('spsa/params.json'));print(f\"P={s['pairs']} TC={s['tc_ms']} INC={s['inc_ms']}\")")
+          ./match2 "$PLUS" "$MINUS" $P 2 $TC $INC $(( (GITHUB_RUN_ID % 100000) * 100 + ${{ matrix.shard }} )) | tail -1 | tee out.txt
+          python3 -c "
+          import json,re; t=open('out.txt').read(); m=re.search(r'W(\d+) L(\d+) D(\d+)',t); d=json.load(open('delta_${{ matrix.shard }}.json'))
+          json.dump({'W':int(m[1]),'L':int(m[2]),'D':int(m[3]),'delta':d['delta']},open('result_${{ matrix.shard }}.json','w'))"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: spsa-${{ matrix.shard }}
+          path: result_${{ matrix.shard }}.json
+  update:
+    needs: [setup, play]
+    if: needs.setup.outputs.go == 'yes' && always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: res
+      - name: update parameters and start next iteration
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "apx-bot"; git config user.email "apx-bot@users.noreply.github.com"
+          for i in 1 2 3 4 5; do
+            git pull -q --rebase origin main
+            python3 tools/spsa.py update res | tee -a "$GITHUB_STEP_SUMMARY"
+            git add spsa/params.json && git commit -q -m "spsa iteration" && git push -q origin main && break
+            git reset -q --hard origin/main; sleep 5
+          done
+          [ -f spsa/STOP ] || gh workflow run spsa.yml --ref main
