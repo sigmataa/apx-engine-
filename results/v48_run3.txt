@@ -1,0 +1,9 @@
+candidate v48 vs src  run 3  Thu Nov 12 21:10:14 UTC 2026
+candidate=v48
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 11  games 1100  W167 L525 D408  penta[99, 231, 163, 43, 14]
+elo -117.3 +- 15.4
+LLR -36.75 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H0 ACCEPTED
