@@ -102,11 +102,12 @@ int TranspositionTable::hashfull()const{
     return total?n*1000/total:0;
 }
 void Searcher::clear(){
-    history={};captureHistory={};counters={};killers={};corrHist={};
+    history={};captureHistory={};counters={};killers={};corrHist={};contCorr={};
     std::fill(continuation.begin(),continuation.end(),0);evaluator.clear();searches=0;nullVerificationPly=-1;
 }
 bool Searcher::visit(){
     if(control->stop.load(std::memory_order_relaxed))return false;
+    ++myNodes;
     U64 n=control->nodes.fetch_add(1,std::memory_order_relaxed)+1;
     if(control->nodeLimit&&n>=control->nodeLimit){control->stop.store(true,std::memory_order_relaxed);return false;}
     if((n&511)==0||n==1){
@@ -227,11 +228,14 @@ void Searcher::updatePv(int ply,Move m){
 constexpr int CORR_GRAIN=256,CORR_WSCALE=1024,CORR_MAX=CORR_GRAIN*48;
 int Searcher::corrected(const Board& b,int raw)const{
     int v=raw+corrHist[b.side][b.pawnKey&16383]/CORR_GRAIN;
+    if(curPly>0&&stack[curPly-1].current)v+=contCorr[b.side][stack[curPly-1].pc][to(stack[curPly-1].current)]/(2*CORR_GRAIN);
     return std::clamp(v,-MATE_BOUND+1,MATE_BOUND-1);
 }
 void Searcher::updateCorrection(const Board& b,int depth,int diff){
     int& e=corrHist[b.side][b.pawnKey&16383];int w=std::min(depth*depth+2*depth+1,128);
     e=std::clamp((e*(CORR_WSCALE-w)+diff*CORR_GRAIN*w)/CORR_WSCALE,-CORR_MAX,CORR_MAX);
+    if(curPly>0&&stack[curPly-1].current){int& c=contCorr[b.side][stack[curPly-1].pc][to(stack[curPly-1].current)];
+        c=std::clamp((c*(CORR_WSCALE-w)+diff*CORR_GRAIN*w)/CORR_WSCALE,-CORR_MAX,CORR_MAX);}
 }
 int Searcher::qsearch(Board& b,int alpha,int beta,int ply,int quietChecks){
     pvLength[ply]=0;selectiveDepth=std::max(selectiveDepth,ply);
@@ -244,7 +248,7 @@ int Searcher::qsearch(Board& b,int alpha,int beta,int ply,int quietChecks){
     if(compatible&&!pvNode&&b.halfmove<90&&hit.found&&(hit.bound==EXACT||(hit.bound==LOWER&&hit.score>=beta)||(hit.bound==UPPER&&hit.score<=alpha)))return hit.score;
     int qdepth=quietChecks?-1:0;
     int originalAlpha=alpha,rawEval=checked?NO_EVAL:(hit.found&&hit.eval!=NO_EVAL?hit.eval:evaluator.evaluate(b));
-    int staticEval=checked?NO_EVAL:corrected(b,rawEval);
+    curPly=ply;int staticEval=checked?NO_EVAL:corrected(b,rawEval);
     int best=checked?-INF:staticEval;Move bestMove=0;
     if(!checked){
         if(best>=beta){tt.store(b.key,ply,qdepth,best,rawEval,LOWER,0);return best;}
@@ -314,7 +318,7 @@ int Searcher::search(Board& b,int depth,int alpha,int beta,int ply,bool pvNode,b
     if(checked&&depth>=2&&ply<rootDepth*2)++depth;
     depth=std::min(depth,MAX_PLY-ply-2);
     int rawEval=checked?NO_EVAL:(hit.found&&hit.eval!=NO_EVAL?hit.eval:evaluator.evaluate(b));
-    int staticEval=checked?NO_EVAL:corrected(b,rawEval);
+    curPly=ply;int staticEval=checked?NO_EVAL:corrected(b,rawEval);
     stack[ply].inCheck=checked;stack[ply].staticEval=staticEval;
     bool improving=!checked&&ply>=2&&stack[ply-2].staticEval!=NO_EVAL&&staticEval>stack[ply-2].staticEval;
     // Verification must examine real moves instead of returning the same
@@ -363,6 +367,7 @@ int Searcher::search(Board& b,int depth,int alpha,int beta,int ply,bool pvNode,b
         }
         if(depth>=5&&!hit.best)--depth;
     }
+    if(depth>=4&&!hit.best&&!excludedMove)--depth;  // internal iterative reduction: no hash move, search shallower first
     int originalAlpha=alpha,best=-INF,legal=0,quietCount=0,us=b.side;
     Move bestMove=0;std::array<Move,256> quiets{},captures{};int nq=0,nc=0;
     MoveList moves;b.generate(moves);MovePicker picker(*this,b,moves,hit.best,ply);
@@ -381,9 +386,11 @@ int Searcher::search(Board& b,int depth,int alpha,int beta,int ply,bool pvNode,b
             if(control->stop.load(std::memory_order_relaxed))return 0;
             if(value<singularBeta)extension=1;
             else if(singularBeta>=beta)return singularBeta;
+            else if(hit.score>=beta)extension=-1;  // negative extension: the TT move is probably not singular and we are already failing high
         }
         int pc=b.squares[from(m)],captured=b.capturedType(m),hist=history[us][from(m)][to(m)]+continuationScore(ply,pc,to(m));
         bool quiet=!item.capture&&!promotion(m),advancedPawn=type(pc)==PAWN&&(us==WHITE?rank(to(m))>=5:rank(to(m))<=2);
+        U64 rootN0=myNodes;
         Undo undo;if(!b.make(m,undo))continue;++legal;if(quiet)++quietCount;
         bool givesCheck=b.inCheck();
         if(ply&&legal>1&&!pvNode&&!checked&&!givesCheck&&!advancedPawn&&nullVerificationPly<0&&std::abs(alpha)<MATE_BOUND){
@@ -406,6 +413,7 @@ int Searcher::search(Board& b,int depth,int alpha,int beta,int ply,bool pvNode,b
             if(pvNode&&score>alpha&&score<beta)score=-search(b,newDepth,-beta,-alpha,ply+1,true,true);
         }
         b.unmake(m,undo);
+        if(!ply)rootNodes[(from(m)<<6)|to(m)]+=myNodes-rootN0;
         if(control->stop.load(std::memory_order_relaxed))return 0;
         if(score>best){best=score;bestMove=m;}
         if(score>alpha){alpha=score;updatePv(ply,m);}
@@ -427,11 +435,12 @@ int Searcher::search(Board& b,int depth,int alpha,int beta,int ply,bool pvNode,b
     if(!legal)return excludedMove?alpha:checked?-MATE+ply:0;
     // A bound over a user-restricted root subset is not a full-position bound.
     if(!checked&&!excludedMove&&std::abs(best)<MATE_BOUND&&(!bestMove||!b.capturedType(bestMove))
-       &&!(best>=beta&&best<=staticEval)&&!(best<=originalAlpha&&best>=staticEval))updateCorrection(b,depth,best-staticEval);
+       &&!(best>=beta&&best<=staticEval)&&!(best<=originalAlpha&&best>=staticEval)){curPly=ply;updateCorrection(b,depth,best-staticEval);}
     if(!excludedMove&&(ply||!rootRestricted))tt.store(b.key,ply,depth,best,rawEval,best>=beta?LOWER:best>originalAlpha?EXACT:UPPER,bestMove);
     return best;
 }
 Result Searcher::run(Board board,const Limits& limits,Control& shared,const Reporter& report){
+    myNodes=0;rootNodes={};
     control=&shared;rootHistory=board.history.size();rootRestricted=limits.restricted;nullVerificationPly=-1;stack={};killers={};pvLength={};selectiveDepth=0;
     if((++searches&7)==0){
         for(auto& side:history)for(auto& row:side)for(auto& v:row)v/=2;
@@ -476,6 +485,10 @@ Result Searcher::run(Board board,const Limits& limits,Control& shared,const Repo
                 long long budget=shared.softMs*1000000;
                 double factor=stable>=3?0.85:stable==0?1.35:1.0;
                 if(drop>=30)factor*=drop>=80?1.5:1.25;
+                // Node fraction: little effort outside the best move -> stop sooner; spread effort -> think longer.
+                if(iteration>=6&&myNodes>0){double frac=double(rootNodes[(from(best)<<6)|to(best)])/double(myNodes);
+                    factor*=std::clamp((1.6-frac)*1.15,0.6,1.5);}
+                factor=std::clamp(factor,0.45,2.2);
                 // TMNextIter < 100 skips an iteration that is unlikely to finish in time.
                 if(nowNs()>=shared.started+static_cast<long long>(budget*factor*T_NEXTITER/100.0))break;
             }
