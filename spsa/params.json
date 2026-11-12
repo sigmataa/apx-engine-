@@ -1,5 +1,5 @@
 {
- "iter": 1,
+ "iter": 2,
  "max_iter": 150,
  "R": 0.006,
  "shards": 10,
@@ -20,79 +20,79 @@
    "c": 4.0
   },
   "RazorMargin": {
-   "v": 167.96,
+   "v": 168.15200000000002,
    "min": 80,
    "max": 400,
    "c": 16.0
   },
   "NMPBase": {
-   "v": 2.252,
+   "v": 2.312,
    "min": 1,
    "max": 4,
    "c": 1.0
   },
   "NMPDepthDiv": {
-   "v": 2.964,
+   "v": 2.892,
    "min": 2,
    "max": 8,
    "c": 1.0
   },
   "NMPEvalDiv": {
-   "v": 197.464,
+   "v": 198.04,
    "min": 80,
    "max": 400,
    "c": 16.0
   },
   "LMPBase": {
-   "v": 3.916,
+   "v": 3.856,
    "min": 1,
    "max": 8,
    "c": 1.0
   },
   "FutilityMul": {
-   "v": 89.176,
+   "v": 89.68,
    "min": 40,
    "max": 180,
    "c": 7.0
   },
   "FutilityBase": {
-   "v": 62.56,
+   "v": 62.2,
    "min": 0,
    "max": 150,
    "c": 7.5
   },
   "HistPrune": {
-   "v": 1598.7,
+   "v": 1594.5,
    "min": 500,
    "max": 4000,
    "c": 175.0
   },
   "SEECapture": {
-   "v": 79.312,
+   "v": 79.15599999999999,
    "min": 30,
    "max": 160,
    "c": 6.5
   },
   "SingularMul": {
-   "v": 3.916,
+   "v": 3.844,
    "min": 1,
    "max": 8,
    "c": 1.0
   },
   "AspWindow": {
-   "v": 25.2808,
+   "v": 25.1248,
    "min": 8,
    "max": 60,
    "c": 2.6
   },
   "LMRDiv": {
-   "v": 190.388,
+   "v": 190.592,
    "min": 150,
    "max": 320,
    "c": 8.5
   },
   "ProbCutMargin": {
-   "v": 202.888,
+   "v": 204.616,
    "min": 80,
    "max": 400,
    "c": 16.0
@@ -119,6 +119,28 @@
     "AspWindow": 25.28,
     "LMRDiv": 190.39,
     "ProbCutMargin": 202.89
+   }
+  },
+  {
+   "iter": 2,
+   "games": 480,
+   "plus_minus_net": 4,
+   "v": {
+    "RFPMargin": 57.86,
+    "RFPImproving": 27.95,
+    "RazorMargin": 168.15,
+    "NMPBase": 2.31,
+    "NMPDepthDiv": 2.89,
+    "NMPEvalDiv": 198.04,
+    "LMPBase": 3.86,
+    "FutilityMul": 89.68,
+    "FutilityBase": 62.2,
+    "HistPrune": 1594.5,
+    "SEECapture": 79.16,
+    "SingularMul": 3.84,
+    "AspWindow": 25.12,
+    "LMRDiv": 190.59,
+    "ProbCutMargin": 204.62
    }
   }
  ]
