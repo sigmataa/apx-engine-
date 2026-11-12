@@ -1,0 +1,9 @@
+candidate ni_cc vs src  run 8  Thu Nov 12 23:09:02 UTC 2026
+candidate=ni_cc
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W494 L432 D1074  penta[37, 221, 437, 253, 52]
+elo +10.8 +- 9.8
+LLR 1.97 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> inconclusive
