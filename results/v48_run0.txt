@@ -1,0 +1,1 @@
+v48 cancelled: broken score scale in public data (labels 2.1x too large); local test -255 Elo. Not a valid candidate.
