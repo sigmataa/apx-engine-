@@ -1,0 +1,9 @@
+candidate tmnodes vs src  run 7  Thu Nov 12 22:53:51 UTC 2026
+candidate=tmnodes
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W503 L436 D1061  penta[39, 225, 417, 268, 51]
+elo +11.6 +- 9.9
+LLR 2.43 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> inconclusive
