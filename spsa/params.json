@@ -1,5 +1,5 @@
 {
- "iter": 0,
+ "iter": 1,
  "max_iter": 150,
  "R": 0.006,
  "shards": 10,
@@ -8,95 +8,118 @@
  "inc_ms": 30,
  "params": {
   "RFPMargin": {
-   "v": 58.0,
+   "v": 57.856,
    "min": 30,
    "max": 150,
    "c": 6.0
   },
   "RFPImproving": {
-   "v": 28.0,
+   "v": 27.952,
    "min": 0,
    "max": 80,
    "c": 4.0
   },
   "RazorMargin": {
-   "v": 167.0,
+   "v": 167.96,
    "min": 80,
    "max": 400,
    "c": 16.0
   },
   "NMPBase": {
-   "v": 2.0,
+   "v": 2.252,
    "min": 1,
    "max": 4,
    "c": 1.0
   },
   "NMPDepthDiv": {
-   "v": 3.0,
+   "v": 2.964,
    "min": 2,
    "max": 8,
    "c": 1.0
   },
   "NMPEvalDiv": {
-   "v": 199.0,
+   "v": 197.464,
    "min": 80,
    "max": 400,
    "c": 16.0
   },
   "LMPBase": {
-   "v": 4.0,
+   "v": 3.916,
    "min": 1,
    "max": 8,
    "c": 1.0
   },
   "FutilityMul": {
-   "v": 88.0,
+   "v": 89.176,
    "min": 40,
    "max": 180,
    "c": 7.0
   },
   "FutilityBase": {
-   "v": 64.0,
+   "v": 62.56,
    "min": 0,
    "max": 150,
    "c": 7.5
   },
   "HistPrune": {
-   "v": 1563.0,
+   "v": 1598.7,
    "min": 500,
    "max": 4000,
    "c": 175.0
   },
   "SEECapture": {
-   "v": 79.0,
+   "v": 79.312,
    "min": 30,
    "max": 160,
    "c": 6.5
   },
   "SingularMul": {
-   "v": 4.0,
+   "v": 3.916,
    "min": 1,
    "max": 8,
    "c": 1.0
   },
   "AspWindow": {
-   "v": 25.0,
+   "v": 25.2808,
    "min": 8,
    "max": 60,
    "c": 2.6
   },
   "LMRDiv": {
-   "v": 191.0,
+   "v": 190.388,
    "min": 150,
    "max": 320,
    "c": 8.5
   },
   "ProbCutMargin": {
-   "v": 205.0,
+   "v": 202.888,
    "min": 80,
    "max": 400,
    "c": 16.0
   }
  },
- "history": []
+ "history": [
+  {
+   "iter": 1,
+   "games": 480,
+   "plus_minus_net": 10,
+   "v": {
+    "RFPMargin": 57.86,
+    "RFPImproving": 27.95,
+    "RazorMargin": 167.96,
+    "NMPBase": 2.25,
+    "NMPDepthDiv": 2.96,
+    "NMPEvalDiv": 197.46,
+    "LMPBase": 3.92,
+    "FutilityMul": 89.18,
+    "FutilityBase": 62.56,
+    "HistPrune": 1598.7,
+    "SEECapture": 79.31,
+    "SingularMul": 3.92,
+    "AspWindow": 25.28,
+    "LMRDiv": 190.39,
+    "ProbCutMargin": 202.89
+   }
+  }
+ ]
 }
