@@ -1,5 +1,5 @@
 {
- "iter": 5,
+ "iter": 6,
  "max_iter": 150,
  "R": 0.006,
  "shards": 10,
@@ -8,91 +8,91 @@
  "inc_ms": 30,
  "params": {
   "RFPMargin": {
-   "v": 57.892,
+   "v": 58.900000000000006,
    "min": 30,
    "max": 150,
    "c": 6.0
   },
   "RFPImproving": {
-   "v": 27.16,
+   "v": 27.064,
    "min": 0,
    "max": 80,
    "c": 4.0
   },
   "RazorMargin": {
-   "v": 169.78400000000002,
+   "v": 168.824,
    "min": 80,
    "max": 400,
    "c": 16.0
   },
   "NMPBase": {
-   "v": 2.4139999999999997,
+   "v": 2.4979999999999998,
    "min": 1,
    "max": 4,
    "c": 1.0
   },
   "NMPDepthDiv": {
-   "v": 2.5260000000000002,
+   "v": 2.6580000000000004,
    "min": 2,
    "max": 8,
    "c": 1.0
   },
   "NMPEvalDiv": {
-   "v": 196.40799999999996,
+   "v": 196.21599999999995,
    "min": 80,
    "max": 400,
    "c": 16.0
   },
   "LMPBase": {
-   "v": 3.934,
+   "v": 4.006,
    "min": 1,
    "max": 8,
    "c": 1.0
   },
   "FutilityMul": {
-   "v": 89.30200000000002,
+   "v": 89.55400000000002,
    "min": 40,
    "max": 180,
    "c": 7.0
   },
   "FutilityBase": {
-   "v": 62.695,
+   "v": 63.325,
    "min": 0,
    "max": 150,
    "c": 7.5
   },
   "HistPrune": {
-   "v": 1603.9499999999998,
+   "v": 1616.5499999999997,
    "min": 500,
    "max": 4000,
    "c": 175.0
   },
   "SEECapture": {
-   "v": 80.91099999999999,
+   "v": 80.44299999999998,
    "min": 30,
    "max": 160,
    "c": 6.5
   },
   "SingularMul": {
-   "v": 3.802,
+   "v": 3.682,
    "min": 1,
    "max": 8,
    "c": 1.0
   },
   "AspWindow": {
-   "v": 24.953200000000002,
+   "v": 25.1092,
    "min": 8,
    "max": 60,
    "c": 2.6
   },
   "LMRDiv": {
-   "v": 191.86700000000002,
+   "v": 193.29500000000002,
    "min": 150,
    "max": 320,
    "c": 8.5
   },
   "ProbCutMargin": {
-   "v": 204.52,
+   "v": 205.288,
    "min": 80,
    "max": 400,
    "c": 16.0
@@ -207,6 +207,28 @@
     "AspWindow": 24.95,
     "LMRDiv": 191.87,
     "ProbCutMargin": 204.52
+   }
+  },
+  {
+   "iter": 6,
+   "games": 480,
+   "plus_minus_net": 4,
+   "v": {
+    "RFPMargin": 58.9,
+    "RFPImproving": 27.06,
+    "RazorMargin": 168.82,
+    "NMPBase": 2.5,
+    "NMPDepthDiv": 2.66,
+    "NMPEvalDiv": 196.22,
+    "LMPBase": 4.01,
+    "FutilityMul": 89.55,
+    "FutilityBase": 63.33,
+    "HistPrune": 1616.55,
+    "SEECapture": 80.44,
+    "SingularMul": 3.68,
+    "AspWindow": 25.11,
+    "LMRDiv": 193.3,
+    "ProbCutMargin": 205.29
    }
   }
  ]
