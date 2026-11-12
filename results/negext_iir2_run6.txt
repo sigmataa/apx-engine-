@@ -1,0 +1,9 @@
+candidate negext_iir2 vs src  run 6  Thu Nov 12 22:32:01 UTC 2026
+candidate=negext_iir2
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W488 L454 D1058  penta[49, 234, 406, 256, 55]
+elo +5.9 +- 10.2
+LLR -0.87 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> inconclusive
