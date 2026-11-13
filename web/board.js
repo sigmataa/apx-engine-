@@ -78,7 +78,10 @@ export class Board {
     }).join('');
 
     let t = '';
-    if (this.badge) { const [x, y] = this.xy(this.badge.sq); t += `<span class="badge ${this.badge.cls}" style="left:${(x + 1) * 12.5}%;top:${y * 12.5}%">${this.badge.t}</span>`; }
+    if (this.badge) {
+      const [x, y] = this.xy(this.badge.sq), key = this.badge.sq + this.badge.t, fresh = key !== this._bk; this._bk = key;
+      t += `<span class="badge ${this.badge.cls}${fresh ? ' pop' : ''}" style="left:${(x + 1) * 12.5}%;top:${y * 12.5}%">${this.badge.t}</span>`;
+    } else this._bk = null;
     if (this.promo) t += '<div class="promo">' + ['Q', 'R', 'B', 'N'].map(p => `<button data-promo="${p.toLowerCase()}" aria-label="Promote to ${p}"><img src="${pieceUrl(turn + p)}" alt=""></button>`).join('') + '</div>';
     this.top.innerHTML = t;
     this.top.classList.toggle('on', !!this.promo);

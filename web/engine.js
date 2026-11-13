@@ -1,4 +1,4 @@
-// Engine access. Uses Stockfish (WebAssembly, in a worker) when it loads, otherwise a small built-in search.
+// Engine access. Uses Stockfish 19 (lite, single-threaded WebAssembly, in a worker) when it loads, otherwise a small built-in search.
 import { Chess } from './vendor/chess.js';
 
 let w = null, onLine = null, q = Promise.resolve();
@@ -8,20 +8,20 @@ export const ready = new Promise(res => {
   let done = false;
   const fin = ok => {
     if (done) return; done = true;
-    if (ok) { eng.sf = true; eng.name = 'Stockfish 10'; }
+    if (ok) { eng.sf = true; eng.name = 'Stockfish 19'; }
     else { try { w && w.terminate(); } catch {} w = null; }
     res(eng);
   };
   try {
-    w = new Worker('vendor/stockfish.js');
+    w = new Worker('vendor/stockfish-19-lite-single.js');
     w.onerror = () => fin(false);
     w.onmessage = e => { const l = String(e.data); if (l === 'uciok') fin(true); else if (onLine) onLine(l); };
     w.postMessage('uci');
-    setTimeout(() => fin(false), 6000);
+    setTimeout(() => fin(false), 10000);
   } catch { fin(false); }
 });
 
-/** Analyse a position. Resolves {best, cp, mate, pv, depth}; cp and mate are from White's point of view. */
+/** Analyse a position. Resolves {best, cp, mate, pv, depth, alt}; cp, mate and alt (second-best line) are from White's point of view. */
 export function think(fen, o = {}) {
   const job = q.then(() => ready).then(() => run(fen, o));
   q = job.catch(() => {});
@@ -29,26 +29,25 @@ export function think(fen, o = {}) {
 }
 export const stop = () => { if (w) w.postMessage('stop'); };
 
-function run(fen, { depth = 10, skill = 20, onInfo, skip } = {}) {
+function run(fen, { depth = 10, skill = 20, multipv = 1, onInfo, skip } = {}) {
   if (skip && skip()) return null;
   const g = new Chess(fen), flip = g.turn() === 'w' ? 1 : -1;
-  if (g.isGameOver()) return { best: null, cp: g.isCheckmate() ? -flip * 100000 : 0, mate: g.isCheckmate() ? 0 : null, pv: [], depth: 0 };
+  if (g.isGameOver()) return { best: null, cp: g.isCheckmate() ? -flip * 100000 : 0, mate: g.isCheckmate() ? 0 : null, pv: [], depth: 0, alt: null };
   if (!w) return new Promise(r => setTimeout(() => r(jsThink(g, flip, skill, depth)), 20));
   return new Promise(res => {
-    let info = { cp: 0, mate: null, pv: [], depth: 0 };
+    let info = { cp: 0, mate: null, pv: [], depth: 0, alt: null };
     onLine = l => {
       if (l.startsWith('info') && l.includes(' pv ') && !/bound/.test(l)) {
-        const d = / depth (\d+)/.exec(l), c = / score cp (-?\d+)/.exec(l), m = / score mate (-?\d+)/.exec(l);
+        const d = / depth (\d+)/.exec(l), c = / score cp (-?\d+)/.exec(l), m = / score mate (-?\d+)/.exec(l), mp = / multipv (\d+)/.exec(l);
         if (!c && !m) return;
-        info = {
-          depth: d ? +d[1] : 0, mate: m ? flip * +m[1] : null,
-          cp: m ? flip * Math.sign(+m[1]) * (100000 - Math.abs(+m[1]) * 100) : flip * +c[1],
-          pv: l.split(' pv ')[1].trim().split(' '),
-        };
+        const cp = m ? flip * Math.sign(+m[1] || -1) * (100000 - Math.abs(+m[1]) * 100) : flip * +c[1];
+        if (mp && +mp[1] > 1) { info.alt = cp; return; }
+        info = { depth: d ? +d[1] : 0, mate: m ? flip * +m[1] : null, cp, pv: l.split(' pv ')[1].trim().split(' '), alt: info.alt };
         if (onInfo) onInfo(info);
       } else if (l.startsWith('bestmove')) { onLine = null; res({ ...info, best: l.split(' ')[1] }); }
     };
     w.postMessage('setoption name Skill Level value ' + skill);
+    w.postMessage('setoption name MultiPV value ' + multipv);
     w.postMessage('position fen ' + fen);
     w.postMessage('go depth ' + depth);
   });
@@ -91,5 +90,5 @@ function jsThink(g, flip, skill, depth) {
     if (v > bs) { bs = v; best = m; }
   }
   const u = best.from + best.to + (best.promotion || '');
-  return { best: u, cp: flip * Math.round(bs), mate: null, pv: [u], depth: d };
+  return { best: u, cp: flip * Math.round(bs), mate: null, pv: [u], depth: d, alt: null };
 }
