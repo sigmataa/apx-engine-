@@ -1,0 +1,18 @@
+name: buildcheck
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        opp: [lynx, laser, weiss, stash, leorik, willow]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+      - run: bash tools/build_opp.sh ${{ matrix.opp }}
