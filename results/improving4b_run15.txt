@@ -1,0 +1,9 @@
+candidate improving4b vs src  run 15  Fri Nov 13 01:36:40 UTC 2026
+candidate=improving4b
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W433 L435 D1132  penta[40, 221, 475, 229, 35]
+elo -0.3 +- 9.3
+LLR -5.19 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H0 ACCEPTED
