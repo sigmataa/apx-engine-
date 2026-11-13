@@ -29,7 +29,7 @@ jobs:
           F="-std=c++20 -O3 -march=native -DNDEBUG -pthread"
           (cd src && g++ $F *.cpp -o ../apx) & g++ $F -Isrc tools/match2.cpp src/chess.cpp -o match2 &
           case ${{ matrix.opp }} in
-            ethereal) git clone -q https://github.com/AndyGrant/Ethereal opp && (P=$(command -v llvm-profdata || ls /usr/bin/llvm-profdata-* 2>/dev/null | tail -1); [ -n "$P" ] || { sudo apt-get install -y -qq llvm >/dev/null; P=$(command -v llvm-profdata); }; cd opp && git checkout -q 0e47e9b67f345c75eb965d9fb3e2493b6a11d09a && cd src && make -s PGOMERGE="$P merge -output=ethereal.profdata *.profraw" && cp Ethereal ../../oppbin) ;;
+            ethereal) git clone -q https://github.com/AndyGrant/Ethereal opp && (V=$(clang --version | grep -oP 'version \K[0-9]+' | head -1); P=$(command -v llvm-profdata-$V); [ -n "$P" ] || { sudo apt-get install -y -qq llvm-$V >/dev/null; P=$(command -v llvm-profdata-$V || echo /usr/lib/llvm-$V/bin/llvm-profdata); }; echo "clang $V profdata $P"; cd opp && git checkout -q 0e47e9b67f345c75eb965d9fb3e2493b6a11d09a && cd src && make -s PGOMERGE="$P merge -output=ethereal.profdata *.profraw" && cp Ethereal ../../oppbin) ;;
             weiss)    git clone -q https://github.com/TerjeKir/weiss opp && (cd opp && git checkout -q c735b8f3d2ddb0cdf42b135a5fb42e21c01f7a3d && cd src && make -s && cp weiss ../../oppbin) ;;
             stash)    git clone -q https://github.com/mhouppin/stash-bot opp && (cd opp && git checkout -q 594435e586a2d98ab29531a8182f4e6fad3949c5 && cd src && make -s && cp stash ../../oppbin) ;;
           esac
@@ -50,6 +50,7 @@ jobs:
         with:
           path: shards
       - run: |
+          find shards -type f | head -40
           f=results/gauntlet_run${GITHUB_RUN_NUMBER}.txt; mkdir -p results
           { echo "gauntlet: Apx (src) vs pinned opponents, 10s+0.1s, $(date -u)"
             for o in ethereal weiss stash; do ls shards/g-$o-* >/dev/null 2>&1 || continue; mkdir -p by/$o; cp shards/g-$o-*/*.txt by/$o/ 2>/dev/null; echo "== $o"; python3 tools/merge.py by/$o | head -2; done; } | tee $f
