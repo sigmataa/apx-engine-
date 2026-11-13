@@ -59,5 +59,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          [ -n "$(gh api repos/${{ github.repository }}/contents/spsa/DATAGEN_STOP 2>/dev/null | head -c1)" ] && { echo "stop file present"; exit 0; }
+          if gh api repos/${{ github.repository }}/contents/spsa/DATAGEN_STOP >/dev/null 2>&1; then echo "stop file present"; exit 0; fi
           gh workflow run datagen.yml --ref main -R ${{ github.repository }} -f minutes=${{ inputs.minutes }} -f nodes=${{ inputs.nodes }} -f shards=${{ inputs.shards }} -f runs_left=$(( ${{ inputs.runs_left }} - 1 ))
