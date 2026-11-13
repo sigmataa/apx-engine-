@@ -1,0 +1,46 @@
+name: datagen
+on:
+  workflow_dispatch:
+    inputs:
+      minutes:
+        description: "minutes of self-play per runner"
+        default: "50"
+      nodes:
+        description: "nodes per move"
+        default: "5000"
+      shards:
+        description: "number of runners"
+        default: "20"
+concurrency:
+  group: datagen
+  cancel-in-progress: false
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      shards: ${{ steps.q.outputs.shards }}
+    steps:
+      - id: q
+        run: echo "shards=[$(seq -s, 1 ${{ inputs.shards }})]" >> "$GITHUB_OUTPUT"
+  gen:
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(needs.setup.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: build
+        run: g++ -std=c++20 -O3 -march=native -DNDEBUG -pthread -Isrc tools/datagen.cpp src/chess.cpp src/eval.cpp src/search.cpp src/kpk.cpp -o datagen
+      - name: self-play
+        run: |
+          ./datagen part $(nproc) $(( ${{ inputs.minutes }} * 60 )) ${{ inputs.nodes }} $(( (GITHUB_RUN_ID % 100000) * 100 + ${{ matrix.shard }} ))
+          cat part.*.bin > sp_${{ matrix.shard }}.bin; ls -la sp_${{ matrix.shard }}.bin
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sp-${{ matrix.shard }}
+          path: sp_${{ matrix.shard }}.bin
+          retention-days: 5
+          compression-level: 1
