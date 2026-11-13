@@ -1,0 +1,9 @@
+candidate v57 vs src  run 22  Fri Nov 13 04:05:15 UTC 2026
+candidate=v57
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W474 L453 D1073  penta[42, 234, 435, 239, 50]
+elo +3.6 +- 9.9
+LLR -2.27 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> inconclusive
