@@ -1,0 +1,9 @@
+candidate v56 vs src  run 20  Fri Nov 13 03:20:16 UTC 2026
+candidate=v56
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W506 L458 D1036  penta[45, 225, 425, 247, 58]
+elo +8.3 +- 10.1
+LLR 0.48 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> inconclusive
