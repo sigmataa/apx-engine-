@@ -1,0 +1,9 @@
+candidate v56b vs src  run 21  Fri Nov 13 03:39:01 UTC 2026
+candidate=v56b
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W454 L458 D1088  penta[50, 235, 434, 231, 50]
+elo -0.7 +- 10.0
+LLR -4.70 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H0 ACCEPTED
