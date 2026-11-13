@@ -1,0 +1,9 @@
+candidate cont4 vs src  run 24  Fri Nov 13 08:15:01 UTC 2026
+candidate=cont4
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W465 L425 D1110  penta[36, 240, 423, 250, 51]
+elo +6.9 +- 9.9
+LLR -0.32 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> inconclusive
