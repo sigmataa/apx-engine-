@@ -1,0 +1,9 @@
+candidate cont4b vs src  run 25  Fri Nov 13 10:40:41 UTC 2026
+candidate=cont4b
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W434 L462 D1104  penta[44, 249, 434, 237, 36]
+elo -4.9 +- 9.7
+LLR -7.62 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H0 ACCEPTED
