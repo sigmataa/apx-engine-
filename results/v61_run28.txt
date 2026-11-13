@@ -1,0 +1,9 @@
+candidate v61 vs src  run 28  Fri Nov 13 21:38:02 UTC 2026
+candidate=v61
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W448 L450 D1102  penta[40, 254, 420, 240, 46]
+elo -0.3 +- 9.9
+LLR -4.65 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H0 ACCEPTED
