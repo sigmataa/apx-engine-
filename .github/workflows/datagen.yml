@@ -11,9 +11,15 @@ on:
       shards:
         description: "number of runners"
         default: "20"
+      runs_left:
+        description: "how many runs to chain (this one included)"
+        default: "1"
 concurrency:
   group: datagen
   cancel-in-progress: false
+permissions:
+  contents: read
+  actions: write
 jobs:
   setup:
     runs-on: ubuntu-latest
@@ -44,3 +50,14 @@ jobs:
           path: sp_${{ matrix.shard }}.bin
           retention-days: 5
           compression-level: 1
+  next:
+    needs: gen
+    if: always() && inputs.runs_left != '1'
+    runs-on: ubuntu-latest
+    steps:
+      - name: start the next chained run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -n "$(gh api repos/${{ github.repository }}/contents/spsa/DATAGEN_STOP 2>/dev/null | head -c1)" ] && { echo "stop file present"; exit 0; }
+          gh workflow run datagen.yml --ref main -R ${{ github.repository }} -f minutes=${{ inputs.minutes }} -f nodes=${{ inputs.nodes }} -f shards=${{ inputs.shards }} -f runs_left=$(( ${{ inputs.runs_left }} - 1 ))
