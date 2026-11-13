@@ -1,0 +1,9 @@
+candidate improving4 vs src  run 14  Fri Nov 13 01:22:58 UTC 2026
+candidate=improving4
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W414 L375 D1211  penta[39, 214, 460, 243, 44]
+elo +6.8 +- 9.6
+LLR -0.45 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> inconclusive
