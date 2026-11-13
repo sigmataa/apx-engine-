@@ -1,0 +1,9 @@
+candidate v58 vs src  run 23  Fri Nov 13 06:17:34 UTC 2026
+candidate=v58
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W479 L470 D1051  penta[49, 256, 397, 233, 65]
+elo +1.6 +- 10.5
+LLR -3.12 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H0 ACCEPTED
