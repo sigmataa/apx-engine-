@@ -1,0 +1,9 @@
+candidate v60 vs src  run 27  Fri Nov 13 18:25:13 UTC 2026
+candidate=v60
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W485 L467 D1048  penta[47, 251, 394, 253, 55]
+elo +3.1 +- 10.3
+LLR -2.38 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> inconclusive
