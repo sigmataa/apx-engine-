@@ -1,0 +1,9 @@
+candidate cutoffcnt2 vs src  run 13  Fri Nov 13 00:55:04 UTC 2026
+candidate=cutoffcnt2
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W505 L444 D1051  penta[49, 219, 418, 250, 64]
+elo +10.6 +- 10.3
+LLR 1.68 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> inconclusive
