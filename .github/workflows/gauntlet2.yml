@@ -1,0 +1,54 @@
+name: gauntlet2
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: "game pairs per shard"
+        default: "34"
+concurrency:
+  group: gauntlet2
+  cancel-in-progress: false
+permissions:
+  contents: write
+jobs:
+  play:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        opp: [lynx, laser, weiss, leorik, stash, willow]
+        shard: [1, 2, 3, 4, 5, 6]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+      - name: build Apx and opponent
+        run: |
+          F="-std=c++20 -O3 -march=native -DNDEBUG -pthread"
+          (cd src && g++ $F *.cpp -o ../apx) & g++ $F -Isrc tools/match2.cpp src/chess.cpp -o match2 & wait
+          bash tools/build_opp.sh ${{ matrix.opp }}
+      - name: play 10s+0.1s
+        run: ./match2 ./apx ./oppbin ${{ inputs.pairs }} 2 10000 100 $(( (GITHUB_RUN_ID % 100000) * 100 + ${{ matrix.shard }} )) | tail -1 | tee s_${{ matrix.opp }}_${{ matrix.shard }}.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: g2-${{ matrix.opp }}-${{ matrix.shard }}
+          path: s_${{ matrix.opp }}_${{ matrix.shard }}.txt
+  fit:
+    needs: play
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: shards
+      - run: |
+          f=results/gauntlet2_run${GITHUB_RUN_NUMBER}.txt; mkdir -p results
+          { echo "gauntlet2: Apx (src) vs CCRL-listed versions, 10s+0.1s, 1 thread, $(date -u)"; python3 tools/gauntlet_fit.py shards; } | tee $f
+          cat $f >> "$GITHUB_STEP_SUMMARY"
+          git config user.name "apx-bot"; git config user.email "apx-bot@users.noreply.github.com"
+          git add results && git commit -m "gauntlet2 result run $GITHUB_RUN_NUMBER" && git pull --rebase && git push
