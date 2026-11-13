@@ -1,0 +1,9 @@
+candidate ref_v46 vs src  run 19  Fri Nov 13 03:05:40 UTC 2026
+candidate=ref_v46
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W322 L589 D1089  penta[77, 321, 417, 162, 23]
+elo -46.7 +- 9.9
+LLR -32.97 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H0 ACCEPTED
