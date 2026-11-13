@@ -1,0 +1,9 @@
+candidate spsa33 vs src  run 18  Fri Nov 13 02:52:35 UTC 2026
+candidate=spsa33
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W451 L424 D1125  penta[40, 238, 436, 227, 59]
+elo +4.7 +- 10.0
+LLR -1.62 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> inconclusive
