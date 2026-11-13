@@ -1,0 +1,9 @@
+candidate v59 vs src  run 26  Fri Nov 13 17:54:33 UTC 2026
+candidate=v59
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W526 L430 D1044  penta[33, 222, 415, 276, 54]
+elo +16.7 +- 9.9
+LLR 5.45 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H1 ACCEPTED
