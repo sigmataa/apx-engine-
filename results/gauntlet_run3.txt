@@ -1,0 +1,4 @@
+gauntlet: Apx (src) vs pinned opponents, 10s+0.1s, Fri Nov 13 15:38:07 UTC 2026
+== ethereal
+shards 6  games 408  W92 L180 D136  penta[36, 64, 65, 30, 9]
+elo -76.1 +- 27.0
