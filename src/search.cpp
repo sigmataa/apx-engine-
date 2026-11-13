@@ -319,7 +319,7 @@ int Searcher::search(Board& b,int depth,int alpha,int beta,int ply,bool pvNode,b
     depth=std::min(depth,MAX_PLY-ply-2);
     int rawEval=checked?NO_EVAL:(hit.found&&hit.eval!=NO_EVAL?hit.eval:evaluator.evaluate(b));
     curPly=ply;int staticEval=checked?NO_EVAL:corrected(b,rawEval);
-    stack[ply].inCheck=checked;stack[ply].staticEval=staticEval;
+    stack[ply].inCheck=checked;stack[ply].staticEval=staticEval;stack[ply+2].cutoffs=0;
     bool improving=!checked&&ply>=2&&stack[ply-2].staticEval!=NO_EVAL&&staticEval>stack[ply-2].staticEval;
     // Verification must examine real moves instead of returning the same
     // static-evaluation or null-move shortcut it is intended to challenge.
@@ -402,7 +402,7 @@ int Searcher::search(Board& b,int depth,int alpha,int beta,int ply,bool pvNode,b
         if(depth>=3&&legal>2+pvNode&&quiet&&!checked&&!givesCheck&&!advancedPawn){
             reduction=reductionTable[depth][legal];
             reduction-=pvNode;reduction-=improving;reduction-=hist/6000;reduction+=ttCapture;
-            reduction-=m==killers[ply][0]||m==killers[ply][1];reduction=std::clamp(reduction,0,std::max(0,newDepth-1));
+            reduction-=m==killers[ply][0]||m==killers[ply][1];reduction+=stack[ply+1].cutoffs>3;reduction=std::clamp(reduction,0,std::max(0,newDepth-1));
         }else if(depth>=3&&legal>2+pvNode&&item.capture&&item.see<0&&!checked&&!givesCheck&&!pvNode){
             reduction=std::clamp(reductionTable[depth][legal]/2,1,std::max(0,newDepth-1));
         }
@@ -418,6 +418,7 @@ int Searcher::search(Board& b,int depth,int alpha,int beta,int ply,bool pvNode,b
         if(score>best){best=score;bestMove=m;}
         if(score>alpha){alpha=score;updatePv(ply,m);}
         if(score>=beta){
+            ++stack[ply].cutoffs;
             int bonus=std::min(1800,depth*depth*28+depth*20);
             if(quiet){
                 if(killers[ply][0]!=m){killers[ply][1]=killers[ply][0];killers[ply][0]=m;}

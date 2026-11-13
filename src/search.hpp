@@ -54,7 +54,7 @@ struct Control {
 struct Result {Move best=0;int score=0,depth=0,seldepth=0;std::vector<Move> pv;};
 using Reporter=std::function<void(const Result&,const Control&)>;
 class Searcher {
-    struct Context {Move current=0;int pc=0,staticEval=32767;bool inCheck=false;};
+    struct Context {Move current=0;int pc=0,staticEval=32767,cutoffs=0;bool inCheck=false;};
     struct Ranked {
         Move m;int order,see;bool capture;
         bool operator<(const Ranked& other)const{
