@@ -5,5 +5,5 @@ pairs=12
 tc_ms=8000
 inc_ms=80
 conc=1
-cand_opts=Threads=4&Hash=64
-base_opts=Threads=1&Hash=64
+cand_opts='Threads=4&Hash=64'
+base_opts='Threads=1&Hash=64'
