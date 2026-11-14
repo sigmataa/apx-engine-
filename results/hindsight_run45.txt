@@ -1,0 +1,10 @@
+candidate hindsight vs src  run 45  Sat Nov 14 21:32:51 UTC 2026
+candidate=hindsight
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+unbal=1
+shards 20  games 2000  W470 L478 D1052  penta[24, 253, 456, 241, 26]
+elo -1.4 +- 9.0
+LLR -6.36 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H0 ACCEPTED
