@@ -1,0 +1,9 @@
+candidate v66b vs src  run 43  Sat Nov 14 20:40:30 UTC 2026
+candidate=v66b
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W320 L618 D1062  penta[76, 344, 404, 154, 22]
+elo -52.2 +- 9.9
+LLR -36.74 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H0 ACCEPTED
