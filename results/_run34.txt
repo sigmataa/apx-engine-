@@ -1,0 +1,10 @@
+candidate  vs src  run 34  Sat Nov 14 13:27:09 UTC 2026
+candidate=smp4
+shards=20
+pairs=12
+tc_ms=8000
+inc_ms=80
+conc=1
+cand_opts=Threads=4&Hash=64
+base_opts=Threads=1&Hash=64
+shards 0  games 0  W0 L0 D0  penta[0, 0, 0, 0, 0]
