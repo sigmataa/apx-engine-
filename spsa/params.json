@@ -1,6 +1,6 @@
 {
  "iter": 150,
- "max_iter": 150,
+ "max_iter": 300,
  "R": 0.006,
  "shards": 10,
  "pairs": 24,
