@@ -7,7 +7,7 @@
 
 namespace forge {
 std::array<std::array<std::uint8_t,257>,MAX_PLY+1> reductionTable{};
-int T_RFP=58,T_RFPI=28,T_RAZOR=167,T_NMPB=2,T_NMPD=3,T_NMPE=199,T_LMPB=4,T_FUTM=88,T_FUTB=64,T_HISTP=1563,T_SEEC=79,T_SING=4,T_ASP=25,T_LMRD=191,T_TMMOVES=23,T_TMINC=79,T_NEXTITER=65,T_PCM=205;
+int T_RFP=37,T_RFPI=29,T_RAZOR=181,T_NMPB=4,T_NMPD=3,T_NMPE=207,T_LMPB=4,T_FUTM=82,T_FUTB=52,T_HISTP=1455,T_SEEC=79,T_SING=4,T_ASP=20,T_LMRD=197,T_TMMOVES=23,T_TMINC=79,T_NEXTITER=65,T_PCM=220;
 std::vector<Tunable>& tunables(){
     static std::vector<Tunable> list={{"RFPMargin",&T_RFP,30,150},{"RFPImproving",&T_RFPI,0,80},{"RazorMargin",&T_RAZOR,80,400},
         {"NMPBase",&T_NMPB,1,4},{"NMPDepthDiv",&T_NMPD,2,8},{"NMPEvalDiv",&T_NMPE,80,400},{"LMPBase",&T_LMPB,1,8},
