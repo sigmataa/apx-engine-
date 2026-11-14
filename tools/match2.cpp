@@ -47,7 +47,9 @@ std::vector<std::string> opening(int idx){
         Proc p(A);std::string pos="position startpos moves";for(auto&s:mv)pos+=" "+s;
         p.send(pos);p.send("go nodes 30000");int sc=99999;
         for(;;){auto l=p.line();if(l.empty())break;auto k=l.find("score cp ");if(k!=std::string::npos)sc=std::atoi(l.c_str()+k+9);if(l.rfind("bestmove",0)==0)break;}
-        if(std::abs(sc)<=60)return mv;
+        // UNBAL=1: unbalanced openings (one side ahead by 0.7-1.4 pawns), each played with both colours.
+        // Fewer draws, so each game pair carries more information than with balanced openings.
+        if(getenv("UNBAL")?(std::abs(sc)>=70&&std::abs(sc)<=140):(std::abs(sc)<=60))return mv;
     }
 }
 // returns score for white: 1, 0.5, 0
