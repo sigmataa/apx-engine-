@@ -80,6 +80,7 @@ class Searcher {
     std::array<U64,4096> rootNodes{};
     std::array<std::array<int,16384>,2> corrHist{};
     std::array<std::array<std::array<int,64>,13>,2> contCorr{};
+    std::array<std::array<std::array<int,16384>,2>,2> npCorr{};  // [side to move][piece colour][non-pawn key]
     int curPly=0;
     int corrected(const Board& b,int raw)const;
     void updateCorrection(const Board& b,int depth,int diff);

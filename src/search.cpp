@@ -102,7 +102,7 @@ int TranspositionTable::hashfull()const{
     return total?n*1000/total:0;
 }
 void Searcher::clear(){
-    history={};captureHistory={};counters={};killers={};corrHist={};contCorr={};
+    history={};captureHistory={};counters={};killers={};corrHist={};contCorr={};npCorr={};
     std::fill(continuation.begin(),continuation.end(),0);evaluator.clear();searches=0;nullVerificationPly=-1;
 }
 bool Searcher::visit(){
@@ -226,14 +226,21 @@ void Searcher::updatePv(int ply,Move m){
 }
 // Pawn-structure correction history: learns the average error of the static eval per pawn structure.
 constexpr int CORR_GRAIN=256,CORR_WSCALE=1024,CORR_MAX=CORR_GRAIN*48;
+// Hash of one colour's non-pawn pieces (knights..king), for the non-pawn correction history.
+static inline unsigned npKey(const Board& b,int c){
+    U64 h=0;for(int t=KNIGHT;t<=KING;++t)h+=b.p[c][t]*(0x9E3779B97F4A7C15ULL+2*U64(t)*0xBF58476D1CE4E5B9ULL);
+    h^=h>>31;h*=0x94D049BB133111EBULL;h^=h>>29;return unsigned(h&16383);
+}
 int Searcher::corrected(const Board& b,int raw)const{
     int v=raw+corrHist[b.side][b.pawnKey&16383]/CORR_GRAIN;
+    v+=(npCorr[b.side][WHITE][npKey(b,WHITE)]+npCorr[b.side][BLACK][npKey(b,BLACK)])/(2*CORR_GRAIN);
     if(curPly>0&&stack[curPly-1].current)v+=contCorr[b.side][stack[curPly-1].pc][to(stack[curPly-1].current)]/(2*CORR_GRAIN);
     return std::clamp(v,-MATE_BOUND+1,MATE_BOUND-1);
 }
 void Searcher::updateCorrection(const Board& b,int depth,int diff){
     int& e=corrHist[b.side][b.pawnKey&16383];int w=std::min(depth*depth+2*depth+1,128);
     e=std::clamp((e*(CORR_WSCALE-w)+diff*CORR_GRAIN*w)/CORR_WSCALE,-CORR_MAX,CORR_MAX);
+    for(int c=0;c<2;++c){int& n=npCorr[b.side][c][npKey(b,c)];n=std::clamp((n*(CORR_WSCALE-w)+diff*CORR_GRAIN*w)/CORR_WSCALE,-CORR_MAX,CORR_MAX);}
     if(curPly>0&&stack[curPly-1].current){int& c=contCorr[b.side][stack[curPly-1].pc][to(stack[curPly-1].current)];
         c=std::clamp((c*(CORR_WSCALE-w)+diff*CORR_GRAIN*w)/CORR_WSCALE,-CORR_MAX,CORR_MAX);}
 }
