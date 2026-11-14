@@ -1,0 +1,9 @@
+candidate shallow vs src  run 36  Sat Nov 14 14:19:50 UTC 2026
+candidate=shallow
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W407 L396 D1197  penta[41, 211, 482, 228, 38]
+elo +1.9 +- 9.4
+LLR -3.67 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H0 ACCEPTED
