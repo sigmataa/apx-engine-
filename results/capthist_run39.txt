@@ -1,0 +1,9 @@
+candidate capthist vs src  run 39  Sat Nov 14 18:35:03 UTC 2026
+candidate=capthist
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W412 L423 D1165  penta[37, 232, 466, 235, 30]
+elo -1.9 +- 9.2
+LLR -6.36 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H0 ACCEPTED
