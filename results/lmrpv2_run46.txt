@@ -1,0 +1,10 @@
+candidate lmrpv2 vs src  run 46  Sat Nov 14 22:00:28 UTC 2026
+candidate=lmrpv2
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+unbal=1
+shards 20  games 2000  W547 L442 D1011  penta[29, 208, 444, 267, 52]
+elo +18.3 +- 9.6
+LLR 6.77 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H1 ACCEPTED
