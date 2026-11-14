@@ -40,8 +40,9 @@ jobs:
           echo uci | ./candbin | grep -q uciok && echo uci | ./base | grep -q uciok
       - name: play
         run: |
-          . <(grep -E '^(candidate|pairs|tc_ms|inc_ms)=' queue.txt)
-          nproc; ./match2 ./candbin ./base $pairs 2 $tc_ms $inc_ms $(( GITHUB_RUN_NUMBER * 100 + ${{ matrix.shard }} )) | tail -3 | tee shard_${{ matrix.shard }}.txt
+          conc=2; cand_opts=; base_opts=
+          . <(grep -E '^(candidate|pairs|tc_ms|inc_ms|conc|cand_opts|base_opts)=' queue.txt)
+          nproc; ./match2 "./candbin${cand_opts:+?$cand_opts}" "./base${base_opts:+?$base_opts}" $pairs $conc $tc_ms $inc_ms $(( GITHUB_RUN_NUMBER * 100 + ${{ matrix.shard }} )) | tail -3 | tee shard_${{ matrix.shard }}.txt
       - uses: actions/upload-artifact@v4
         with:
           name: shard-${{ matrix.shard }}
