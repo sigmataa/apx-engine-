@@ -1,0 +1,9 @@
+candidate spsa150 vs src  run 32  Sat Nov 14 12:32:29 UTC 2026
+candidate=spsa150
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W462 L356 D1182  penta[28, 198, 462, 264, 48]
+elo +18.4 +- 9.4
+LLR 7.19 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H1 ACCEPTED
