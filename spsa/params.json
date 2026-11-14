@@ -1,5 +1,5 @@
 {
- "iter": 92,
+ "iter": 93,
  "max_iter": 150,
  "R": 0.006,
  "shards": 10,
@@ -8,119 +8,97 @@
  "inc_ms": 30,
  "params": {
   "RFPMargin": {
-   "v": 45.436000000000014,
+   "v": 46.372000000000014,
    "min": 30,
    "max": 150,
    "c": 6.0
   },
   "RFPImproving": {
-   "v": 28.360000000000003,
+   "v": 28.168000000000003,
    "min": 0,
    "max": 80,
    "c": 4.0
   },
   "RazorMargin": {
-   "v": 183.2240000000001,
+   "v": 186.1040000000001,
    "min": 80,
    "max": 400,
    "c": 16.0
   },
   "NMPBase": {
-   "v": 3.2900000000000005,
+   "v": 3.2060000000000004,
    "min": 1,
    "max": 4,
    "c": 1.0
   },
   "NMPDepthDiv": {
-   "v": 3.594,
+   "v": 3.546,
    "min": 2,
    "max": 8,
    "c": 1.0
   },
   "NMPEvalDiv": {
-   "v": 206.20000000000007,
+   "v": 206.96800000000007,
    "min": 80,
    "max": 400,
    "c": 16.0
   },
   "LMPBase": {
-   "v": 3.7180000000000004,
+   "v": 3.8500000000000005,
    "min": 1,
    "max": 8,
    "c": 1.0
   },
   "FutilityMul": {
-   "v": 82.66599999999998,
+   "v": 82.58199999999998,
    "min": 40,
    "max": 180,
    "c": 7.0
   },
   "FutilityBase": {
-   "v": 49.194999999999965,
+   "v": 49.374999999999964,
    "min": 0,
    "max": 150,
    "c": 7.5
   },
   "HistPrune": {
-   "v": 1593.4499999999996,
+   "v": 1574.5499999999995,
    "min": 500,
    "max": 4000,
    "c": 175.0
   },
   "SEECapture": {
-   "v": 72.09699999999991,
+   "v": 71.86299999999991,
    "min": 30,
    "max": 160,
    "c": 6.5
   },
   "SingularMul": {
-   "v": 3.5380000000000016,
+   "v": 3.6820000000000017,
    "min": 1,
    "max": 8,
    "c": 1.0
   },
   "AspWindow": {
-   "v": 19.087600000000005,
+   "v": 18.806800000000006,
    "min": 8,
    "max": 60,
    "c": 2.6
   },
   "LMRDiv": {
-   "v": 201.149,
+   "v": 201.455,
    "min": 150,
    "max": 320,
    "c": 8.5
   },
   "ProbCutMargin": {
-   "v": 218.72800000000004,
+   "v": 217.96000000000004,
    "min": 80,
    "max": 400,
    "c": 16.0
   }
  },
  "history": [
-  {
-   "iter": 33,
-   "games": 480,
-   "plus_minus_net": 12,
-   "v": {
-    "RFPMargin": 57.21,
-    "RFPImproving": 25.55,
-    "RazorMargin": 178.9,
-    "NMPBase": 2.18,
-    "NMPDepthDiv": 2.78,
-    "NMPEvalDiv": 196.7,
-    "LMPBase": 4.55,
-    "FutilityMul": 88.34,
-    "FutilityBase": 61.12,
-    "HistPrune": 1663.8,
-    "SEECapture": 73.07,
-    "SingularMul": 3.65,
-    "AspWindow": 22.63,
-    "LMRDiv": 189.98,
-    "ProbCutMargin": 210.38
-   }
-  },
   {
    "iter": 34,
    "games": 480,
@@ -1417,6 +1395,28 @@
     "AspWindow": 19.09,
     "LMRDiv": 201.15,
     "ProbCutMargin": 218.73
+   }
+  },
+  {
+   "iter": 93,
+   "games": 480,
+   "plus_minus_net": -4,
+   "v": {
+    "RFPMargin": 46.37,
+    "RFPImproving": 28.17,
+    "RazorMargin": 186.1,
+    "NMPBase": 3.21,
+    "NMPDepthDiv": 3.55,
+    "NMPEvalDiv": 206.97,
+    "LMPBase": 3.85,
+    "FutilityMul": 82.58,
+    "FutilityBase": 49.37,
+    "HistPrune": 1574.55,
+    "SEECapture": 71.86,
+    "SingularMul": 3.68,
+    "AspWindow": 18.81,
+    "LMRDiv": 201.46,
+    "ProbCutMargin": 217.96
    }
   }
  ]
