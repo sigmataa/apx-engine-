@@ -1,0 +1,12 @@
+candidate smp4 vs src  run 35  Sat Nov 14 13:49:56 UTC 2026
+candidate=smp4
+shards=20
+pairs=12
+tc_ms=8000
+inc_ms=80
+conc=1
+cand_opts='Threads=4&Hash=64'
+base_opts='Threads=1&Hash=64'
+shards 20  games 480  W180 L27 D273  penta[1, 16, 83, 109, 31]
+elo +114.7 +- 19.7
+LLR 19.00 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H1 ACCEPTED
