@@ -3,9 +3,9 @@
  "max_iter": 300,
  "R": 0.006,
  "shards": 10,
- "pairs": 24,
- "tc_ms": 3000,
- "inc_ms": 30,
+ "pairs": 12,
+ "tc_ms": 10000,
+ "inc_ms": 100,
  "params": {
   "RFPMargin": {
    "v": 37.37200000000004,
