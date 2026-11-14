@@ -14,6 +14,12 @@ on:
       runs_left:
         description: "how many runs to chain (this one included)"
         default: "1"
+      deep_nodes:
+        description: "nodes for the second, deeper search (0 = off)"
+        default: "0"
+      deep_pct:
+        description: "percent of positions that get the deeper search"
+        default: "0"
 concurrency:
   group: datagen
   cancel-in-progress: false
@@ -42,12 +48,16 @@ jobs:
         run: g++ -std=c++20 -O3 -march=native -DNDEBUG -pthread -Isrc tools/datagen.cpp src/chess.cpp src/eval.cpp src/search.cpp src/kpk.cpp -o datagen
       - name: self-play
         run: |
-          ./datagen part $(nproc) $(( ${{ inputs.minutes }} * 60 )) ${{ inputs.nodes }} $(( (GITHUB_RUN_ID % 100000) * 100 + ${{ matrix.shard }} ))
+          ./datagen part $(nproc) $(( ${{ inputs.minutes }} * 60 )) ${{ inputs.nodes }} $(( (GITHUB_RUN_ID % 100000) * 100 + ${{ matrix.shard }} )) ${{ inputs.deep_nodes || '0' }} ${{ inputs.deep_pct || '0' }}
           cat part.*.bin > sp_${{ matrix.shard }}.bin; ls -la sp_${{ matrix.shard }}.bin
+          if ls mine.*.bin >/dev/null 2>&1; then cat mine.*.bin > mine_${{ matrix.shard }}.bin; ls -la mine_${{ matrix.shard }}.bin; fi
       - uses: actions/upload-artifact@v4
         with:
           name: sp-${{ matrix.shard }}
-          path: sp_${{ matrix.shard }}.bin
+          path: |
+            sp_${{ matrix.shard }}.bin
+            mine_${{ matrix.shard }}.bin
+          if-no-files-found: warn
           retention-days: 5
           compression-level: 1
   next:
@@ -60,4 +70,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if gh api repos/${{ github.repository }}/contents/spsa/DATAGEN_STOP >/dev/null 2>&1; then echo "stop file present"; exit 0; fi
-          gh workflow run datagen.yml --ref main -R ${{ github.repository }} -f minutes=${{ inputs.minutes }} -f nodes=${{ inputs.nodes }} -f shards=${{ inputs.shards }} -f runs_left=$(( ${{ inputs.runs_left }} - 1 ))
+          gh workflow run datagen.yml --ref main -R ${{ github.repository }} -f minutes=${{ inputs.minutes }} -f nodes=${{ inputs.nodes }} -f shards=${{ inputs.shards }} -f runs_left=$(( ${{ inputs.runs_left }} - 1 )) -f deep_nodes=${{ inputs.deep_nodes || '0' }} -f deep_pct=${{ inputs.deep_pct || '0' }}
