@@ -10,7 +10,10 @@ for o, r in LIST.items():
     out = subprocess.run(["python3", "tools/merge.py", f"by/{o}"], capture_output=True, text=True).stdout
     g = re.search(r"games (\d+)", out); m = re.search(r"elo ([+-][\d.]+) \+- ([\d.]+)", out)
     if not m: continue
-    d, e = float(m[1]), float(m[2]); se = e / 1.96; w = 1 / se ** 2
+    d, e = float(m[1]), float(m[2])
+    if e <= 0 or abs(d) >= 800:  # degenerate (opponent crashed / forfeited every game): skip
+        rows.append(f"{o:7s} SKIPPED (degenerate result {d:+.0f} +- {e:.1f})"); continue
+    se = e / 1.96; w = 1 / se ** 2
     num += (r + d) * w; den += w; rows.append(f"{o:7s} list {r}  Apx {d:+6.1f} +- {e:4.1f}  -> {r + d:.0f}  ({g[1]} games)")
 print("\n".join(rows))
 if den: print(f"\nApx combined: {num/den:.0f} +- {1.96/math.sqrt(den):.0f} (95%), anchored to the listed ratings (single-thread, 10s+0.1s)")

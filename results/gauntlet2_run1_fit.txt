@@ -1,0 +1,8 @@
+lynx    list 3319  Apx +129.1 +- 28.5  -> 3448  (408 games)
+laser   list 3338  Apx +135.0 +- 29.6  -> 3473  (408 games)
+weiss   SKIPPED (degenerate result +1600 +- 0.0)
+leorik  list 3403  Apx -135.0 +- 26.2  -> 3268  (408 games)
+stash   list 3437  Apx   +9.4 +- 25.9  -> 3446  (408 games)
+willow  list 3444  Apx  -70.8 +- 29.0  -> 3373  (408 games)
+
+Apx combined: 3398 +- 12 (95%), anchored to the listed ratings (single-thread, 10s+0.1s)
