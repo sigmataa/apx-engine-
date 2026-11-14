@@ -1,0 +1,9 @@
+candidate npcorr vs src  run 37  Sat Nov 14 17:19:28 UTC 2026
+candidate=npcorr
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W434 L358 D1208  penta[26, 222, 444, 266, 42]
+elo +13.2 +- 9.4
+LLR 3.76 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H1 ACCEPTED
