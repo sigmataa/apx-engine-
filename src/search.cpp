@@ -31,18 +31,18 @@ constexpr int NO_EVAL=32767;
 
 int encodeMate(int score,int ply){return score>=MATE_BOUND?score+ply:score<=-MATE_BOUND?score-ply:score;}
 int decodeMate(int score,int ply){return score>=MATE_BOUND?score-ply:score<=-MATE_BOUND?score+ply:score;}
-U64 pack(Move m,int score,int eval,int depth,int bound,int age){
+U64 pack(Move m,int score,int eval,int depth,int bound,int age,bool pv){
     // 255 tags quiescence with a remaining quiet-check budget. It is not a
     // full-search depth, so ordinary depth-one searches cannot reuse it.
     int encodedDepth=depth<0?255:std::clamp(depth,0,254);
     return U64(m)|(U64(std::uint16_t(std::int16_t(score)))<<16)
       |(U64(std::uint16_t(std::int16_t(eval)))<<32)|(U64(encodedDepth)<<48)
-      |(U64(bound)<<56)|(U64(age&31)<<58)|(U64(1)<<63);
+      |(U64(bound)<<56)|(U64(age&15)<<58)|(U64(pv)<<62)|(U64(1)<<63);
 }
 TTData unpack(U64 v,int ply){
     TTData d;d.found=(v>>63)!=0;d.best=Move(v&0xffff);d.score=decodeMate(std::int16_t((v>>16)&0xffff),ply);
     d.eval=std::int16_t((v>>32)&0xffff);int depth=int((v>>48)&255);d.qchecks=depth==255;d.depth=d.qchecks?0:depth;
-    d.bound=int((v>>56)&3);d.age=int((v>>58)&31);return d;
+    d.bound=int((v>>56)&3);d.age=int((v>>58)&15);d.pv=((v>>62)&1)!=0;return d;
 }
 void adjust(std::int16_t& h,int bonus){bonus=std::clamp(bonus,-4000,4000);int value=h;value+=bonus-value*std::abs(bonus)/16384;h=std::int16_t(std::clamp(value,-16384,16384));}
 U64 discoveredCheckSources(const Board& b){
@@ -72,7 +72,7 @@ TTData TranspositionTable::probe(U64 key,int ply)const{
     }
     return {};
 }
-void TranspositionTable::store(U64 key,int ply,int depth,int score,int eval,int bound,Move best){
+void TranspositionTable::store(U64 key,int ply,int depth,int score,int eval,int bound,Move best,bool pv){
     auto& bucket=table[key&(buckets-1)];Entry* selected=nullptr;int quality=std::numeric_limits<int>::max();
     for(auto& e:bucket.entry){
         U64 c=e.checksum.load(std::memory_order_acquire),v=e.data.load(std::memory_order_relaxed);
@@ -83,10 +83,10 @@ void TranspositionTable::store(U64 key,int ply,int depth,int score,int eval,int 
             if(depth<old.depth-3&&bound!=EXACT&&old.age==generation)return;
             selected=&e;break;
         }
-        int q=old.depth-6*((generation-old.age)&31)+(old.bound==EXACT?4:0);
+        int q=old.depth-6*((generation-old.age)&15)+(old.bound==EXACT?4:0);
         if(q<quality){quality=q;selected=&e;}
     }
-    U64 data=pack(best,encodeMate(score,ply),eval,depth,bound,generation);
+    U64 data=pack(best,encodeMate(score,ply),eval,depth,bound,generation,pv);
     selected->data.store(data,std::memory_order_relaxed);selected->checksum.store(key^data,std::memory_order_release);
 }
 void TranspositionTable::prefetch(U64 key)const{
@@ -98,7 +98,7 @@ void TranspositionTable::prefetch(U64 key)const{
 }
 int TranspositionTable::hashfull()const{
     int n=0,total=0;
-    for(std::size_t i=0;i<std::min<std::size_t>(250,buckets);++i)for(auto& e:table[i].entry){U64 v=e.data.load(std::memory_order_relaxed);++total;if((v>>63)&&int((v>>58)&31)==generation)++n;}
+    for(std::size_t i=0;i<std::min<std::size_t>(250,buckets);++i)for(auto& e:table[i].entry){U64 v=e.data.load(std::memory_order_relaxed);++total;if((v>>63)&&int((v>>58)&15)==generation)++n;}
     return total?n*1000/total:0;
 }
 void Searcher::clear(){
@@ -319,7 +319,7 @@ int Searcher::search(Board& b,int depth,int alpha,int beta,int ply,bool pvNode,b
     if(ply>=MAX_PLY-2){if(!b.hasLegalMove())return checked?-MATE+ply:0;return evaluator.evaluate(b);}
     if(ply){alpha=std::max(alpha,-MATE+ply);beta=std::min(beta,MATE-ply-1);if(alpha>=beta)return alpha;}
     Move excludedMove=excluded[ply];
-    auto hit=tt.probe(b.key,ply);
+    auto hit=tt.probe(b.key,ply);bool ttPv=pvNode||(hit.found&&hit.pv);
     if(!excludedMove&&ply!=nullVerificationPly&&ply&&!pvNode&&b.halfmove<90&&hit.found&&hit.depth>=depth
        &&(hit.bound==EXACT||(hit.bound==LOWER&&hit.score>=beta)||(hit.bound==UPPER&&hit.score<=alpha)))return hit.score;
     if(checked&&depth>=2&&ply<rootDepth*2)++depth;
@@ -406,9 +406,9 @@ int Searcher::search(Board& b,int depth,int alpha,int beta,int ply,bool pvNode,b
         }
         stack[ply].current=m;stack[ply].pc=pc;tt.prefetch(b.key);
         int newDepth=depth-1+extension,reduction=0,score;
-        if(depth>=3&&legal>2+pvNode&&quiet&&!checked&&!givesCheck&&!advancedPawn){
+        if(depth>=3&&legal>2+pvNode&&quiet&&!checked&&!advancedPawn){
             reduction=reductionTable[depth][legal];
-            reduction-=pvNode;reduction-=improving;reduction-=hist/6000;reduction+=ttCapture;
+            reduction-=givesCheck;reduction-=pvNode;reduction-=ttPv&&!pvNode;reduction-=improving;reduction-=hist/6000;reduction+=ttCapture;
             reduction-=m==killers[ply][0]||m==killers[ply][1];reduction+=stack[ply+1].cutoffs>3;reduction=std::clamp(reduction,0,std::max(0,newDepth-1));
         }else if(depth>=3&&legal>2+pvNode&&item.capture&&item.see<0&&!checked&&!givesCheck&&!pvNode){
             reduction=std::clamp(reductionTable[depth][legal]/2,1,std::max(0,newDepth-1));
@@ -444,7 +444,7 @@ int Searcher::search(Board& b,int depth,int alpha,int beta,int ply,bool pvNode,b
     // A bound over a user-restricted root subset is not a full-position bound.
     if(!checked&&!excludedMove&&std::abs(best)<MATE_BOUND&&(!bestMove||!b.capturedType(bestMove))
        &&!(best>=beta&&best<=staticEval)&&!(best<=originalAlpha&&best>=staticEval)){curPly=ply;updateCorrection(b,depth,best-staticEval);}
-    if(!excludedMove&&(ply||!rootRestricted))tt.store(b.key,ply,depth,best,rawEval,best>=beta?LOWER:best>originalAlpha?EXACT:UPPER,bestMove);
+    if(!excludedMove&&(ply||!rootRestricted))tt.store(b.key,ply,depth,best,rawEval,best>=beta?LOWER:best>originalAlpha?EXACT:UPPER,bestMove,ttPv);
     return best;
 }
 Result Searcher::run(Board board,const Limits& limits,Control& shared,const Reporter& report){

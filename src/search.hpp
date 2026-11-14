@@ -16,7 +16,7 @@ struct Tunable {const char* name;int* value;int lo,hi;};
 extern int T_RFP,T_RFPI,T_RAZOR,T_NMPB,T_NMPD,T_NMPE,T_LMPB,T_FUTM,T_FUTB,T_HISTP,T_SEEC,T_SING,T_ASP,T_LMRD,T_TMMOVES,T_TMINC,T_NEXTITER,T_PCM;
 std::vector<Tunable>& tunables();
 void rebuildReductions();
-struct TTData {Move best=0;int score=0,eval=32767,depth=0,bound=0,age=0;bool found=false,qchecks=false;};
+struct TTData {Move best=0;int score=0,eval=32767,depth=0,bound=0,age=0;bool found=false,qchecks=false,pv=false;};
 enum Bound {NONE=0,UPPER=1,LOWER=2,EXACT=3};
 class TranspositionTable {
     struct Entry {std::atomic<U64> checksum{0},data{0};};
@@ -28,9 +28,9 @@ public:
     explicit TranspositionTable(int mb=64){resize(mb);}
     void resize(int mb);
     void clear();
-    void newSearch(){generation=(generation+1)&31;}
+    void newSearch(){generation=(generation+1)&15;}
     TTData probe(U64 key,int ply)const;
-    void store(U64 key,int ply,int depth,int score,int eval,int bound,Move best);
+    void store(U64 key,int ply,int depth,int score,int eval,int bound,Move best,bool pv=false);
     void prefetch(U64 key)const;
     int hashfull()const;
 };
