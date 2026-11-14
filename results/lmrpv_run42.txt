@@ -1,0 +1,10 @@
+candidate lmrpv vs src  run 42  Sat Nov 14 20:13:22 UTC 2026
+candidate=lmrpv
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+unbal=1
+shards 20  games 2000  W503 L449 D1048  penta[39, 214, 451, 246, 50]
+elo +9.4 +- 9.7
+LLR 1.15 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> inconclusive
