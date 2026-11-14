@@ -1,0 +1,9 @@
+candidate v64b vs src  run 31  Sat Nov 14 10:44:38 UTC 2026
+candidate=v64b
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W415 L439 D1146  penta[41, 262, 414, 246, 37]
+elo -4.2 +- 9.8
+LLR -7.07 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H0 ACCEPTED
