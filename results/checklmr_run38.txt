@@ -1,0 +1,9 @@
+candidate checklmr vs src  run 38  Sat Nov 14 18:09:54 UTC 2026
+candidate=checklmr
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+shards 20  games 2000  W436 L411 D1153  penta[38, 234, 430, 261, 37]
+elo +4.3 +- 9.6
+LLR -1.97 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> inconclusive
