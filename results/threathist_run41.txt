@@ -1,0 +1,10 @@
+candidate threathist vs src  run 41  Sat Nov 14 19:40:02 UTC 2026
+candidate=threathist
+shards=20
+pairs=50
+tc_ms=4000
+inc_ms=40
+unbal=1
+shards 20  games 2000  W499 L496 D1005  penta[38, 240, 446, 233, 43]
+elo +0.5 +- 9.6
+LLR -4.35 (H1 at +2.94 = gain, H0 at -2.94 = no gain)  -> H0 ACCEPTED
